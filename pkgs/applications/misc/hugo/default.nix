@@ -1,19 +1,33 @@
-{ stdenv, buildGoModule, fetchFromGitHub }:
+{ stdenv, buildGoModule, fetchFromGitHub, libsass }:
 
 buildGoModule rec {
   pname = "hugo";
-  version = "0.69.2";
+  version = "0.70.0";
 
-  goPackagePath = "github.com/gohugoio/hugo";
+  buildInputs = [ libsass ];
 
   src = fetchFromGitHub {
     owner = "gohugoio";
     repo = pname;
     rev = "v${version}";
-    sha256 = "0bw31264q8w2r3fm3g2qjh9531nmbn942vl5rjf2cjff25c0d4ji";
+    sha256 = "14g1x95jh91z9xm3xkv2psw2jn7z6bv2009miyv727df4d58nh6m";
   };
 
-  modSha256 = "1i1mw8jcklmnsqawc1jkgw4h1dxjxb9zaf2p8pgfzxzpy5cp6qkl";
+  golibsass = fetchFromGitHub {
+    owner = "bep";
+    repo = "golibsass";
+    rev = "8a04397f0baba474190a9f58019ff499ec43057a";
+    sha256 = "0xk3m2ynbydzx87dz573ihwc4ryq0r545vz937szz175ivgfrhh3";
+  };
+
+  overrideModAttrs = (_: {
+      postBuild = ''
+      rm -rf vendor/github.com/bep/golibsass/
+      cp -r --reflink=auto ${golibsass} vendor/github.com/bep/golibsass
+      '';
+    });
+
+  vendorSha256 = "1wl9pg5wf1n5n7gq6lyz0l5ij4icjpfinl4myxwj93l2hqqyx2lf";
 
   buildFlags = [ "-tags" "extended" ];
 
